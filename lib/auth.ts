@@ -16,8 +16,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://localhost:54321",
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
   }),
   callbacks: {
     async session({ session, user }) {
@@ -45,6 +45,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 declare module "next-auth" {
   interface Session {
     supabaseAccessToken?: string;
-    user: { id: string } & Session["user"];
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
   }
 }
