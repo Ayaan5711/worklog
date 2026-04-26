@@ -1,4 +1,3 @@
-"use client";
 import type { Log, CreateLogInput, PromptStyle, StructuredLog } from "./types";
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {

@@ -1,19 +1,19 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { LogType, PromptStyle, StructuredLog } from "./types";
 
-const MODEL = "claude-sonnet-4-5";
-
-function getClient() {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
-  return new Anthropic({ apiKey });
-}
+const MODEL = "gemini-2.0-flash-lite";
 
 const styleText: Record<PromptStyle, string> = {
   professional: "Write in polished professional language suitable for performance reviews and manager updates.",
   concise: "Use a short, direct tone ideal for standup updates and quick summaries.",
   technical: "Emphasize technical implementation details, tools, and system behavior.",
 };
+
+function getClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: MODEL });
+}
 
 export async function structureLog(
   rawInput: string,
@@ -28,13 +28,7 @@ export async function structureLog(
     : "";
 
   try {
-    const msg = await client.messages.create({
-      model: MODEL,
-      max_tokens: 512,
-      temperature: 0.2,
-      messages: [{
-        role: "user",
-        content: `You are a work log structuring assistant. Convert this raw work log into structured JSON.
+    const result = await client.generateContent(`You are a work log structuring assistant. Convert this raw work log into structured JSON.
 
 Raw input: "${rawInput}"
 ${projectHint}
@@ -45,19 +39,15 @@ Return ONLY valid JSON:
 {
   "summary": "Clean, professional, resume-ready summary. Strong action verbs. Concise but specific.",
   "project": "Project name (1-3 words)",
-  "type": "One of: feature, bug, refactor, meeting, research, review, design, testing, deploy, setup, task, learning",
-  "tags": ["tag1", "tag2"],
-  "impact": "One sentence describing business or technical impact"
+  "type": "One of: feature, bug, refactor, meeting, research, review, design, testing, deploy, setup, task, learning"
 }
 
 Rules:
 - building/implementing = "feature", fixing = "bug", redesigning/restructuring = "refactor"
 - Capitalize properly, end summary with period
-- Return ONLY the JSON, no markdown fences`,
-      }],
-    });
+- Return ONLY the JSON, no markdown fences`);
 
-    const text = msg.content.map(c => c.type === "text" ? c.text : "").join("").trim();
+    const text = result.response.text().trim();
     const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     return JSON.parse(cleaned) as StructuredLog;
   } catch (err) {
@@ -74,13 +64,7 @@ export async function generateBragSheet(
   if (!client) return null;
 
   try {
-    const msg = await client.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      temperature: 0.3,
-      messages: [{
-        role: "user",
-        content: `You are a professional resume writer. ${styleText[style]} Generate 5-8 impactful bullet points from these work logs.
+    const result = await client.generateContent(`You are a professional resume writer. ${styleText[style]} Generate 5-8 impactful bullet points from these work logs.
 
 Work logs:
 ${logsText}
@@ -93,11 +77,9 @@ Requirements:
 - Show initiative and impact
 - 1-2 sentences per bullet max, ordered by impact
 
-Return ONLY a JSON array of strings. No markdown, no explanation.`,
-      }],
-    });
+Return ONLY a JSON array of strings. No markdown, no explanation.`);
 
-    const text = msg.content.map(c => c.type === "text" ? c.text : "").join("").trim();
+    const text = result.response.text().trim();
     const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     return JSON.parse(cleaned) as string[];
   } catch (err) {
@@ -115,23 +97,15 @@ export async function generateStandup(
   if (!client) return null;
 
   try {
-    const msg = await client.messages.create({
-      model: MODEL,
-      max_tokens: 512,
-      temperature: 0.3,
-      messages: [{
-        role: "user",
-        content: `Write a concise 2-3 sentence daily standup update from these work logs. ${styleText[style]} Suitable for Slack or Teams. Cover what was done and what's next (infer from context).
+    const result = await client.generateContent(`Write a concise 2-3 sentence daily standup update from these work logs. ${styleText[style]} Suitable for Slack or Teams. Cover what was done and what's next (infer from context).
 
 Date: ${date}
 Logs:
 ${logsText}
 
-Return ONLY the update text, no quotes, no explanation.`,
-      }],
-    });
+Return ONLY the update text, no quotes, no explanation.`);
 
-    return msg.content.map(c => c.type === "text" ? c.text : "").join("").trim() || null;
+    return result.response.text().trim() || null;
   } catch (err) {
     console.error("generateStandup failed:", err);
     return null;
@@ -146,22 +120,14 @@ export async function generateWeeklySummary(
   if (!client) return null;
 
   try {
-    const msg = await client.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      temperature: 0.3,
-      messages: [{
-        role: "user",
-        content: `Write a concise weekly progress summary from these work logs. ${styleText[style]} Format as a professional manager update — 3-5 bullet points covering key accomplishments grouped by theme.
+    const result = await client.generateContent(`Write a concise weekly progress summary from these work logs. ${styleText[style]} Format as a professional manager update — 3-5 bullet points covering key accomplishments grouped by theme.
 
 Logs:
 ${logsText}
 
-Return only the summary text. Use bullet points with "•" character.`,
-      }],
-    });
+Return only the summary text. Use bullet points with "•" character.`);
 
-    return msg.content.map(c => c.type === "text" ? c.text : "").join("").trim() || null;
+    return result.response.text().trim() || null;
   } catch (err) {
     console.error("generateWeeklySummary failed:", err);
     return null;
@@ -169,15 +135,7 @@ Return only the summary text. Use bullet points with "•" character.`,
 }
 
 // Keyword-based fallback when API is unavailable
-export function inferProjectFallback(text: string): string {
-  const l = text.toLowerCase();
-  const map: Record<string, string> = {
-    cv: "CV Parser", parser: "CV Parser", resume: "CV Parser",
-    llm: "LLM Pipeline", pipeline: "LLM Pipeline",
-    pulseiq: "PulseIQ", pulse: "PulseIQ", survey: "PulseIQ",
-    onboarding: "Onboarding", access: "Onboarding",
-  };
-  for (const [k, v] of Object.entries(map)) if (l.includes(k)) return v;
+export function inferProjectFallback(_text: string): string {
   return "General";
 }
 

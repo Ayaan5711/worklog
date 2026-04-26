@@ -4,10 +4,6 @@ import { cookies } from "next/headers";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://localhost:54321";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder";
 
-export function createClient() {
-  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
   return createServerClient(

@@ -6,13 +6,82 @@ import { api } from "@/lib/api";
 import { TYPE_COLORS, TYPE_ICONS } from "@/lib/constants";
 import type { LogType } from "@/lib/types";
 
+function calcStreak(logs: { date: string }[]): number {
+  if (!logs.length) return 0;
+  const dates = new Set(logs.map(l => l.date));
+  let streak = 0;
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  if (!dates.has(fmt(d))) { d.setDate(d.getDate() - 1); }
+  while (dates.has(fmt(d))) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+
+function ActivityHeatmap({ logs }: { logs: { date: string }[] }) {
+  const counts: Record<string, number> = {};
+  logs.forEach(l => { counts[l.date] = (counts[l.date] || 0) + 1; });
+
+  const weeks: { date: string; count: number }[][] = [];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setDate(today.getDate() - 7 * 15 + 1);
+  // align to Monday
+  while (start.getDay() !== 1) start.setDate(start.getDate() - 1);
+
+  let week: { date: string; count: number }[] = [];
+  const cur = new Date(start);
+  while (cur <= today) {
+    const ds = cur.toISOString().slice(0, 10);
+    week.push({ date: ds, count: counts[ds] || 0 });
+    if (week.length === 7) { weeks.push(week); week = []; }
+    cur.setDate(cur.getDate() + 1);
+  }
+  if (week.length) weeks.push(week);
+
+  const max = Math.max(...Object.values(counts), 1);
+  const color = (count: number) => {
+    if (!count) return "#1a2030";
+    const intensity = Math.min(count / max, 1);
+    if (intensity < 0.33) return "#6c9fff33";
+    if (intensity < 0.66) return "#6c9fff88";
+    return "#6c9fff";
+  };
+
+  return (
+    <div>
+      <h3 className="text-sm font-semibold mb-3">Activity</h3>
+      <div className="flex gap-1 overflow-x-auto pb-1">
+        {weeks.map((week, wi) => (
+          <div key={wi} className="flex flex-col gap-1">
+            {week.map(({ date, count }) => (
+              <div key={date} title={`${date}: ${count} log${count !== 1 ? "s" : ""}`}
+                className="w-3.5 h-3.5 sm:w-3 sm:h-3 rounded-sm cursor-default transition-colors flex-shrink-0"
+                style={{ background: color(count) }} />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-1 mt-2">
+        <span className="text-[10px] text-[#556]">Less</span>
+        {["#1a2030","#6c9fff33","#6c9fff88","#6c9fff"].map(c => (
+          <div key={c} className="w-3 h-3 rounded-sm" style={{ background: c }} />
+        ))}
+        <span className="text-[10px] text-[#556]">More</span>
+      </div>
+    </div>
+  );
+}
+
 export default function StatsDashboard() {
   const { logs, setLogs, promptStyle } = useLogStore();
   const [weeklySummary, setWeeklySummary] = useState("");
   const [weeklyLoading, setWeeklyLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(logs.length === 0);
 
   useEffect(() => {
-    if (logs.length === 0) api.logs.list().then(setLogs).catch(() => {});
+    if (logs.length === 0) {
+      api.logs.list().then(setLogs).catch(() => {}).finally(() => setInitialLoading(false));
+    }
   }, []);
 
   const typeCounts: Record<string, number> = {};
@@ -23,6 +92,7 @@ export default function StatsDashboard() {
   });
 
   const maxProject = Math.max(...Object.values(projectCounts), 1);
+  const streak = calcStreak(logs);
 
   const generateWeekly = async () => {
     setWeeklyLoading(true); setWeeklySummary("");
@@ -32,6 +102,31 @@ export default function StatsDashboard() {
     } catch { toast.error("Failed to generate summary"); }
     setWeeklyLoading(false);
   };
+
+  if (initialLoading) return (
+    <div className="space-y-5">
+      <h2 className="text-lg font-semibold">Stats</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[1,2,3,4].map(i => <div key={i} className="h-20 bg-[#141820] rounded-xl animate-pulse" />)}
+      </div>
+      <div className="h-24 bg-[#141820] rounded-xl animate-pulse" />
+      <div className="h-32 bg-[#141820] rounded-xl animate-pulse" />
+    </div>
+  );
+
+  if (logs.length === 0) return (
+    <div className="space-y-5">
+      <h2 className="text-lg font-semibold">Stats</h2>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="text-4xl mb-4">📊</div>
+        <h3 className="text-base font-semibold mb-1">No data yet</h3>
+        <p className="text-sm text-[#8690a5] mb-4">Log a few days of work to see your stats.</p>
+        <a href="/log" className="px-5 py-2 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] hover:opacity-90 transition-opacity">
+          Add your first entry
+        </a>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
@@ -52,6 +147,20 @@ export default function StatsDashboard() {
         ))}
       </div>
 
+      {/* Streak */}
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 flex items-center gap-4">
+        <div className="text-3xl">{streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "📅"}</div>
+        <div>
+          <div className="text-2xl font-bold font-mono text-[#f0b860]">{streak} <span className="text-base font-semibold">day{streak !== 1 ? "s" : ""}</span></div>
+          <div className="text-xs text-[#8690a5]">{streak === 0 ? "Log today to start your streak" : streak === 1 ? "Current streak — keep it up!" : `Current streak — ${streak >= 7 ? "on fire! 🔥" : "great work!"}`}</div>
+        </div>
+      </div>
+
+      {/* Activity heatmap */}
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+        <ActivityHeatmap logs={logs} />
+      </div>
+
       {/* Weekly summary */}
       <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2">
@@ -62,7 +171,7 @@ export default function StatsDashboard() {
         <p className="text-xs text-[#8690a5]">Manager-ready summary of your past 7 days.</p>
         <button onClick={generateWeekly} disabled={weeklyLoading}
           className="w-full py-2.5 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] disabled:opacity-50 hover:opacity-90 transition-opacity">
-          {weeklyLoading ? "Claude is writing..." : "Generate Weekly Summary"}
+          {weeklyLoading ? "AI is writing..." : "Generate Weekly Summary"}
         </button>
         {weeklyLoading && (
           <div className="space-y-1.5">{[1,2,3].map(i => <div key={i} className="h-3 bg-[#2a3040] rounded animate-pulse" style={{ width: `${60 + i * 12}%` }} />)}</div>

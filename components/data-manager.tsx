@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
@@ -8,9 +8,16 @@ import type { Log } from "@/lib/types";
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
 export default function DataManager() {
-  const { logs, setLogs } = useLogStore();
+  const { logs, setLogs, setLoading } = useLogStore();
   const [importMsg, setImportMsg] = useState("");
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (logs.length > 0) return;
+    setLoading(true);
+    api.logs.list().then(setLogs).catch(() => toast.error("Failed to load logs")).finally(() => setLoading(false));
+  }, []);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify(logs, null, 2)], { type: "application/json" });
@@ -36,25 +43,30 @@ export default function DataManager() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
-        const imported = JSON.parse(ev.target?.result as string) as (Partial<Log> & { project_override?: string; type_override?: string })[];
-        if (!Array.isArray(imported)) throw new Error("Not an array");
+        const raw = JSON.parse(ev.target?.result as string) as (Partial<Log> & { project_override?: string; type_override?: string })[];
+        if (!Array.isArray(raw)) throw new Error("Not an array");
+        const toImport = raw.filter(entry =>
+          entry.raw_input && entry.date && !logs.some(l => l.date === entry.date && l.raw_input === entry.raw_input)
+        );
+        setImportProgress({ current: 0, total: toImport.length });
         let added = 0;
-        for (const entry of imported) {
-          if (!entry.raw_input || !entry.date) continue;
-          if (logs.some(l => l.date === entry.date && l.raw_input === entry.raw_input)) continue;
+        for (let i = 0; i < toImport.length; i++) {
+          const entry = toImport[i];
           await api.logs.create({
-            raw_input: entry.raw_input,
-            date: entry.date,
+            raw_input: entry.raw_input!,
+            date: entry.date!,
             project_override: entry.project_override,
             type_override: entry.type_override as Log["type"],
           });
           added++;
+          setImportProgress({ current: i + 1, total: toImport.length });
         }
         const fresh = await api.logs.list();
         setLogs(fresh);
+        setImportProgress(null);
         setImportMsg(`Imported ${added} entries`);
         toast.success(`Imported ${added} entries`);
-      } catch { setImportMsg("Invalid file format"); toast.error("Import failed"); }
+      } catch { setImportProgress(null); setImportMsg("Invalid file format"); toast.error("Import failed"); }
       setTimeout(() => setImportMsg(""), 4000);
     };
     reader.readAsText(file);
@@ -87,10 +99,16 @@ export default function DataManager() {
           <span>📂</span><span className="text-sm font-semibold">Import</span>
         </div>
         <p className="text-xs text-[#8690a5] mb-3">Restore from a JSON backup. Duplicates are skipped.</p>
-        <label className="px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold cursor-pointer hover:bg-[#6c9fff]/15 transition-colors inline-block">
-          Choose JSON file
-          <input ref={fileRef} type="file" accept=".json" onChange={importJSON} className="hidden" />
+        <label className={`px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold cursor-pointer hover:bg-[#6c9fff]/15 transition-colors inline-block ${importProgress ? "opacity-50 pointer-events-none" : ""}`}>
+          {importProgress ? `Importing ${importProgress.current}/${importProgress.total}...` : "Choose JSON file"}
+          <input ref={fileRef} type="file" accept=".json" onChange={importJSON} className="hidden" disabled={!!importProgress} />
         </label>
+        {importProgress && (
+          <div className="mt-2 bg-[#0c0f14] rounded-full h-1.5 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] transition-all duration-300"
+              style={{ width: `${(importProgress.current / importProgress.total) * 100}%` }} />
+          </div>
+        )}
         {importMsg && <p className="mt-2 text-xs font-semibold text-[#5ce0a0]">{importMsg}</p>}
       </div>
 
@@ -100,7 +118,7 @@ export default function DataManager() {
           <span>💡</span><span className="text-sm font-semibold">Tips for daily use</span>
         </div>
         <ol className="space-y-2 text-xs text-[#8690a5] leading-relaxed">
-          <li><strong className="text-white">1. End of day</strong> — go to New Log, type what you did. Claude polishes it.</li>
+          <li><strong className="text-white">1. End of day</strong> — go to New Log, type what you did. AI polishes it.</li>
           <li><strong className="text-white">2. Before standup</strong> — Standup tab → generate → paste into Teams/Slack.</li>
           <li><strong className="text-white">3. Before 1:1</strong> — Brag Sheet → generate → share with manager.</li>
           <li><strong className="text-white">4. Weekly</strong> — Stats → weekly summary → send in email.</li>

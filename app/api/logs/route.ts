@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
   const { date, raw_input, project_override, type_override, style = "professional" } = body;
 
   if (!raw_input?.trim()) return NextResponse.json({ error: "raw_input required" }, { status: 400 });
+  if (raw_input.length > 2000) return NextResponse.json({ error: "raw_input too long (max 2000 chars)" }, { status: 400 });
 
   const db = createServiceClient();
 
