@@ -31,8 +31,11 @@ export default function TimelinePage() {
   const { logs, setLogs, setLoading, loading, updateLog, removeLog, filters, setFilter, resetFilters, filteredLogs, allProjects, allTypes } = useLogStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [editMode, setEditMode] = useState<"summary" | "raw">("summary");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
   const [showDateFilters, setShowDateFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(30);
 
   const load = (force = false) => {
     if (logs.length > 0 && !force) return;
@@ -46,6 +49,7 @@ export default function TimelinePage() {
   };
 
   useEffect(() => { load(); }, []);
+  useEffect(() => { setVisibleCount(30); }, [filters]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -57,16 +61,26 @@ export default function TimelinePage() {
   };
 
   const handleSaveEdit = async (log: Log) => {
+    setEditSaving(true);
     try {
-      const updated = await api.logs.update(log.id, { raw_input: editText });
+      const body = editMode === "raw" ? { raw_input: editText } : { summary: editText };
+      const updated = await api.logs.update(log.id, body);
       updateLog(log.id, updated);
       setEditingId(null);
       toast.success("Updated");
     } catch { toast.error("Failed to update"); }
+    setEditSaving(false);
+  };
+
+  const startEdit = (log: Log) => {
+    setEditingId(log.id);
+    setEditMode("summary");
+    setEditText(log.summary);
   };
 
   const displayed = filteredLogs();
-  const grouped = groupByDate(displayed);
+  const visible = displayed.slice(0, visibleCount);
+  const grouped = groupByDate(visible);
   const projects = allProjects();
   const types = allTypes();
   const hasFilters = filters.project || filters.type || filters.search || filters.from || filters.to;
@@ -158,6 +172,7 @@ export default function TimelinePage() {
       {/* Grouped list */}
       <div className="space-y-8">
         {grouped.map(({ date, label, logs: dayLogs }) => (
+
           <div key={date}>
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xs font-semibold text-[#8690a5] uppercase tracking-wider">{label}</span>
@@ -171,11 +186,29 @@ export default function TimelinePage() {
                   <div className="group flex-1 bg-[#141820] border border-[#2a3040] rounded-xl px-5 py-4">
                     {editingId === log.id ? (
                       <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-[10px] text-[#8690a5]">Editing</span>
+                          <div className="flex rounded-lg border border-[#2a3040] overflow-hidden text-[10px] font-semibold">
+                            <button onClick={() => { setEditMode("summary"); setEditText(log.summary); }}
+                              className={`px-2.5 py-1 transition-colors ${editMode === "summary" ? "bg-[#6c9fff]/15 text-[#6c9fff]" : "text-[#556] hover:text-[#8690a5]"}`}>
+                              Summary
+                            </button>
+                            <button onClick={() => { setEditMode("raw"); setEditText(log.raw_input); }}
+                              className={`px-2.5 py-1 border-l border-[#2a3040] transition-colors ${editMode === "raw" ? "bg-[#6c9fff]/15 text-[#6c9fff]" : "text-[#556] hover:text-[#8690a5]"}`}>
+                              Raw + AI
+                            </button>
+                          </div>
+                        </div>
                         <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={3}
                           className="w-full bg-[#0c0f14] border border-[#2a3040] rounded-lg px-3 py-2.5 text-sm text-white resize-none focus:outline-none" />
-                        <div className="flex gap-2 mt-3">
-                          <button onClick={() => handleSaveEdit(log)} className="px-3 py-1.5 bg-[#6c9fff] text-[#0c0f14] rounded-lg text-xs font-semibold">Save with AI</button>
-                          <button onClick={() => setEditingId(null)} className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">Cancel</button>
+                        <p className="text-[10px] text-[#556] mt-1 mb-2">
+                          {editMode === "summary" ? "Saves directly — no AI call." : "Re-runs AI to restructure from your raw input."}
+                        </p>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleSaveEdit(log)} disabled={editSaving} className="px-3 py-1.5 bg-[#6c9fff] text-[#0c0f14] rounded-lg text-xs font-semibold disabled:opacity-50">
+                            {editSaving ? "Saving..." : editMode === "raw" ? "Save with AI" : "Save"}
+                          </button>
+                          <button onClick={() => setEditingId(null)} disabled={editSaving} className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs disabled:opacity-40">Cancel</button>
                         </div>
                       </div>
                     ) : confirmDeleteId === log.id ? (
@@ -195,8 +228,8 @@ export default function TimelinePage() {
                               {TYPE_ICONS[log.type as LogType] || "📝"} {log.type}
                             </span>
                           </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                            <button onClick={() => { setEditingId(log.id); setEditText(log.raw_input); }} className="text-xs px-2 py-1 text-[#556] hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Edit">✏️</button>
+                          <div className="flex gap-1 opacity-40 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
+                            <button onClick={() => startEdit(log)} className="text-xs px-2 py-1 text-[#556] hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Edit">✏️</button>
                             <button onClick={() => setConfirmDeleteId(log.id)} className="text-xs px-2 py-1 text-[#556] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete">🗑️</button>
                           </div>
                         </div>
@@ -210,6 +243,13 @@ export default function TimelinePage() {
           </div>
         ))}
       </div>
+
+      {displayed.length > visibleCount && (
+        <button onClick={() => setVisibleCount(n => n + 30)}
+          className="w-full py-2.5 rounded-xl border border-[#2a3040] text-sm text-[#8690a5] hover:text-white hover:border-[#3a4258] transition-colors">
+          Load more <span className="text-[#556]">({displayed.length - visibleCount} remaining)</span>
+        </button>
+      )}
     </div>
   );
 }

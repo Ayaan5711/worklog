@@ -11,7 +11,20 @@ export default function DataManager() {
   const { logs, setLogs, setLoading } = useLogStore();
   const [importMsg, setImportMsg] = useState("");
   const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleDeleteAll = async () => {
+    setClearing(true);
+    try {
+      await api.logs.deleteAll();
+      setLogs([]);
+      setConfirmClear(false);
+      toast.success("All data deleted");
+    } catch { toast.error("Failed to delete"); }
+    setClearing(false);
+  };
 
   useEffect(() => {
     if (logs.length > 0) return;
@@ -50,16 +63,17 @@ export default function DataManager() {
         );
         setImportProgress({ current: 0, total: toImport.length });
         let added = 0;
-        for (let i = 0; i < toImport.length; i++) {
-          const entry = toImport[i];
-          await api.logs.create({
+        const BATCH = 5;
+        for (let i = 0; i < toImport.length; i += BATCH) {
+          const slice = toImport.slice(i, i + BATCH);
+          await Promise.all(slice.map(entry => api.logs.create({
             raw_input: entry.raw_input!,
             date: entry.date!,
             project_override: entry.project_override,
             type_override: entry.type_override as Log["type"],
-          });
-          added++;
-          setImportProgress({ current: i + 1, total: toImport.length });
+          })));
+          added += slice.length;
+          setImportProgress({ current: Math.min(i + BATCH, toImport.length), total: toImport.length });
         }
         const fresh = await api.logs.list();
         setLogs(fresh);
@@ -110,6 +124,32 @@ export default function DataManager() {
           </div>
         )}
         {importMsg && <p className="mt-2 text-xs font-semibold text-[#5ce0a0]">{importMsg}</p>}
+      </div>
+
+      {/* Danger zone */}
+      <div className="bg-[#141820] border border-red-500/20 rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <span>⚠️</span><span className="text-sm font-semibold text-red-400">Danger Zone</span>
+        </div>
+        <p className="text-xs text-[#8690a5] mb-3">Permanently delete all your logs. This cannot be undone.</p>
+        {!confirmClear ? (
+          <button onClick={() => setConfirmClear(true)} disabled={logs.length === 0}
+            className="px-4 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors disabled:opacity-40">
+            Delete all data ({logs.length} entries)
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-[#8690a5]">Are you sure? This is permanent.</span>
+            <button onClick={handleDeleteAll} disabled={clearing}
+              className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
+              {clearing ? "Deleting..." : "Yes, delete all"}
+            </button>
+            <button onClick={() => setConfirmClear(false)}
+              className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tips */}

@@ -2,28 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase";
 import { generateBragSheet } from "@/lib/anthropic";
+import { safeStyle } from "@/lib/types";
 import type { Log, PromptStyle } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { from, to, projects, style = "professional" }: {
-    from?: string; to?: string; projects?: string[]; style?: PromptStyle;
+  const { from, to, projects, style }: {
+    from?: string; to?: string; projects?: unknown; style?: unknown;
   } = await req.json();
+  const safeStyleVal: PromptStyle = safeStyle(style);
+  const safeProjects = Array.isArray(projects)
+    ? projects.slice(0, 50).map(p => String(p).slice(0, 200))
+    : undefined;
 
   const db = createServiceClient();
   let query = db.from("logs").select("*").eq("user_id", session.user.id).order("date", { ascending: true });
   if (from) query = query.gte("date", from);
   if (to) query = query.lte("date", to);
-  if (projects?.length) query = query.in("project", projects);
+  if (safeProjects?.length) query = query.in("project", safeProjects);
 
   const { data: logs, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[brag]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
   if (!logs?.length) return NextResponse.json({ bullets: [], generated_at: new Date().toISOString() });
 
   const logsText = (logs as Log[]).map(l => `[${l.date}] [${l.project}] [${l.type}] ${l.summary}`).join("\n");
-  const bullets = await generateBragSheet(logsText, style);
+  const bullets = await generateBragSheet(logsText, safeStyleVal);
 
   if (!bullets) {
     const fallbackBullets: string[] = [];

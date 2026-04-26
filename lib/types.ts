@@ -27,12 +27,9 @@ export interface StructuredLog {
   type: LogType;
 }
 
-export interface Profile {
-  id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  timezone: string;
-  created_at: string;
-}
-
 export type PromptStyle = "professional" | "concise" | "technical";
+
+const VALID_STYLES: PromptStyle[] = ["professional", "concise", "technical"];
+export function safeStyle(s: unknown): PromptStyle {
+  return VALID_STYLES.includes(s as PromptStyle) ? (s as PromptStyle) : "professional";
+}

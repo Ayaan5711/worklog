@@ -60,23 +60,38 @@ function DateButton({ value, onChange, placeholder }: { value: string; onChange:
 }
 
 export default function BragSheet() {
-  const { promptStyle } = useLogStore();
-  const [bullets, setBullets] = useState<string[]>([]);
+  const { promptStyle, allProjects, logs, setLogs } = useLogStore();
+  const [bullets, setBullets] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (logs.length === 0) api.logs.list().then(setLogs).catch(() => {});
+  }, []);
+
+  const projects = allProjects();
+
+  const toggleProject = (p: string) =>
+    setSelectedProjects(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
 
   const generate = async () => {
-    setLoading(true); setBullets([]);
+    setLoading(true); setBullets(null);
     try {
-      const result = await api.ai.brag({ from: from || undefined, to: to || undefined, style: promptStyle });
-      setBullets(result.bullets);
+      const result = await api.ai.brag({
+        from: from || undefined,
+        to: to || undefined,
+        projects: selectedProjects.length ? selectedProjects : undefined,
+        style: promptStyle,
+      });
+      setBullets(result.bullets ?? []);
     } catch { toast.error("Failed to generate brag sheet"); }
     setLoading(false);
   };
 
   const copyAll = () => {
-    navigator.clipboard?.writeText(bullets.map(b => `• ${b}`).join("\n"));
+    navigator.clipboard?.writeText((bullets ?? []).map(b => `• ${b}`).join("\n"));
     toast.success("Copied to clipboard");
   };
 
@@ -98,6 +113,27 @@ export default function BragSheet() {
             <DateButton value={to} onChange={setTo} placeholder="Today" />
           </div>
         </div>
+
+        {projects.length > 0 && (
+          <div>
+            <label className="block text-[10px] text-[#8690a5] mb-2">
+              Projects <span className="text-[#556]">{selectedProjects.length ? `(${selectedProjects.length} selected)` : "(all)"}</span>
+            </label>
+            <div className="flex gap-1.5 flex-wrap max-h-24 overflow-y-auto">
+              {projects.map(p => (
+                <button key={p} type="button" onClick={() => toggleProject(p)}
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all ${
+                    selectedProjects.includes(p)
+                      ? "bg-[#6c9fff]/15 border-[#6c9fff]/40 text-[#6c9fff]"
+                      : "bg-transparent border-[#2a3040] text-[#556] hover:text-[#8690a5] hover:border-[#3a4258]"
+                  }`}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <p className="text-[10px] text-[#556]">Leave blank to use all logs</p>
         <button onClick={generate} disabled={loading}
           className="w-full py-2.5 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] disabled:opacity-50 hover:opacity-90 transition-opacity">
@@ -119,16 +155,29 @@ export default function BragSheet() {
         </div>
       )}
 
-      {bullets.length > 0 && !loading && (
+      {bullets !== null && bullets.length === 0 && !loading && (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="text-3xl mb-3">🔍</div>
+          <p className="text-sm text-[#8690a5]">No logs found for the selected filters.</p>
+          <a href="/log" className="mt-3 text-xs text-[#6c9fff] hover:underline">Add some work logs first</a>
+        </div>
+      )}
+
+      {bullets !== null && bullets.length > 0 && !loading && (
         <div className="bg-[#141820] border border-[#2a3040] rounded-xl overflow-hidden">
           <div className="h-0.5 bg-gradient-to-r from-[#6c9fff] via-[#5ce0a0] to-[#b48cff]" />
           <div className="px-6 pt-5 pb-2 space-y-0">
             {bullets.map((b, i) => (
-              <div key={i} className="flex gap-4 py-4 border-b border-[#1e2535] last:border-0">
+              <div key={i} className="group flex gap-4 py-4 border-b border-[#1e2535] last:border-0">
                 <span className="text-[10px] font-bold font-mono text-[#6c9fff] bg-[#6c9fff]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
                   {i + 1}
                 </span>
-                <p className="text-sm leading-relaxed text-[#cdd5e0]">{b}</p>
+                <p className="text-sm leading-relaxed text-[#cdd5e0] flex-1">{b}</p>
+                <button onClick={() => { navigator.clipboard?.writeText(b); toast.success("Copied"); }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5 p-1 rounded text-[#556] hover:text-[#6c9fff] hover:bg-[#6c9fff]/10"
+                  title="Copy bullet">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
               </div>
             ))}
           </div>

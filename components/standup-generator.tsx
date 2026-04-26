@@ -31,17 +31,30 @@ function fmtDate(ds: string) {
 }
 
 export default function StandupGenerator() {
-  const { logs, promptStyle } = useLogStore();
+  const { logs, setLogs, promptStyle } = useLogStore();
   const [date, setDate] = useState(todayStr());
   const [update, setUpdate] = useState("");
   const [loading, setLoading] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
+  const [logsReady, setLogsReady] = useState(logs.length > 0);
   const calRef = useRef<HTMLDivElement>(null);
 
   const [whatsNext, setWhatsNext] = useState("");
   const recentDates = [...new Set(logs.map(l => l.date))].sort().reverse().slice(0, 8);
+  const dateLogCount = logs.filter(l => l.date === date).length;
+
+  useEffect(() => {
+    if (logs.length === 0) {
+      api.logs.list().then(data => { setLogs(data); setLogsReady(true); }).catch(() => setLogsReady(true));
+    }
+  }, []);
 
   useEffect(() => { setWhatsNext(localStorage.getItem("worklog_whats_next") || ""); }, []);
+
+  const clearWhatsNext = () => {
+    setWhatsNext("");
+    localStorage.removeItem("worklog_whats_next");
+  };
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -57,7 +70,9 @@ export default function StandupGenerator() {
     try {
       const result = await api.ai.standup(target, promptStyle);
       let text = result.update;
-      if (whatsNext) text += `\n\nToday: ${whatsNext}`;
+      const today = todayStr();
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (whatsNext && (target === today || target === yesterday)) text += `\n\nToday: ${whatsNext}`;
       setUpdate(text);
       if (d) setDate(d);
     } catch { toast.error("Failed to generate standup"); }
@@ -74,10 +89,13 @@ export default function StandupGenerator() {
       {whatsNext && (
         <div className="bg-[#6c9fff]/[0.04] border border-[#6c9fff]/15 rounded-xl px-4 py-3 flex items-start gap-2">
           <span className="text-sm">📌</span>
-          <div>
-            <p className="text-[10px] text-[#6c9fff] font-semibold mb-0.5">Carried forward from yesterday</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-[#6c9fff] font-semibold mb-0.5">📌 Pinned reminder</p>
             <p className="text-sm text-white">{whatsNext}</p>
           </div>
+          <button onClick={clearWhatsNext} className="text-[#556] hover:text-white transition-colors shrink-0 mt-0.5" title="Clear">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
         </div>
       )}
 
@@ -102,10 +120,20 @@ export default function StandupGenerator() {
               )}
             </div>
           </div>
-          <button onClick={() => generate()} disabled={loading}
-            className="px-5 py-2 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] disabled:opacity-50 hover:opacity-90 transition-opacity">
-            {loading ? "Writing..." : "Generate"}
-          </button>
+          <div className="flex flex-col gap-1">
+            <button onClick={() => generate()} disabled={loading}
+              className="px-5 py-2 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] disabled:opacity-50 hover:opacity-90 transition-opacity">
+              {loading ? "Writing..." : "Generate"}
+            </button>
+            {logsReady && (
+              <p className="text-[10px] text-center text-[#556]">
+                {dateLogCount > 0
+                  ? `${dateLogCount} log${dateLogCount !== 1 ? "s" : ""} for this date`
+                  : <span>No logs · <a href="/log" className="text-[#6c9fff] hover:underline">Add one</a></span>
+                }
+              </p>
+            )}
+          </div>
         </div>
 
         {recentDates.length > 0 && (

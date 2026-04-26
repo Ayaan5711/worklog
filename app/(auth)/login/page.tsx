@@ -30,7 +30,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-[#556]">
-          By signing in you agree to keep your API keys safe and not share your account.
+          Your data is private and only visible to you.
         </p>
       </div>
     </main>

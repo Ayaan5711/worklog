@@ -27,19 +27,21 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   }
 
-  delete body.project_override;
-  delete body.type_override;
-  body.updated_at = new Date().toISOString();
+  const allowed = ["summary", "raw_input", "project", "type", "date"] as const;
+  const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  for (const key of allowed) {
+    if (key in body) update[key] = body[key];
+  }
 
   const { data, error } = await db
     .from("logs")
-    .update(body)
+    .update(update)
     .eq("id", id)
     .eq("user_id", session.user.id)
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[logs/PUT]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
   return NextResponse.json(data);
 }
 
@@ -50,6 +52,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params;
   const db = createServiceClient();
   const { error } = await db.from("logs").delete().eq("id", id).eq("user_id", session.user.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[logs/DELETE id]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
   return new NextResponse(null, { status: 204 });
 }

@@ -22,11 +22,13 @@ export const api = {
       request<Log>(`/api/logs/${id}`, { method: "PUT", body: JSON.stringify(body) }),
     delete: (id: string) =>
       request<void>(`/api/logs/${id}`, { method: "DELETE" }),
+    deleteAll: () =>
+      request<void>("/api/logs", { method: "DELETE" }),
   },
   ai: {
-    structure: (raw_input: string, style?: PromptStyle) =>
+    structure: (raw_input: string, style?: PromptStyle, existingProjects?: string[]) =>
       request<StructuredLog & { fallback: boolean }>("/api/ai/structure", {
-        method: "POST", body: JSON.stringify({ raw_input, style }),
+        method: "POST", body: JSON.stringify({ raw_input, style, existingProjects }),
       }),
     brag: (params?: { from?: string; to?: string; projects?: string[]; style?: PromptStyle }) =>
       request<{ bullets: string[]; generated_at: string }>("/api/ai/brag", {

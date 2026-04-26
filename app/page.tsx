@@ -23,12 +23,31 @@ export default async function LandingPage() {
           </p>
         </div>
 
+        {/* Before / after demo */}
+        <div className="bg-[#141820] border border-[#2a3040] rounded-2xl p-5 space-y-3">
+          <p className="text-[10px] uppercase tracking-wider text-[#556] font-semibold">How it works</p>
+          <div className="space-y-2">
+            <div className="bg-[#0c0f14] rounded-lg px-3 py-2.5">
+              <p className="text-[10px] text-[#556] mb-1">You type</p>
+              <p className="text-sm text-[#8690a5] leading-relaxed">fixed auth bug, reviewed 2 PRs, meeting about Q3 roadmap</p>
+            </div>
+            <div className="flex justify-center text-[#556] text-xs">↓ AI structures it</div>
+            <div className="bg-[#0c0f14] border border-[#6c9fff]/15 rounded-lg px-3 py-2.5 space-y-2">
+              <p className="text-[10px] text-[#6c9fff] mb-1">Structured log</p>
+              <p className="text-sm text-white leading-relaxed">Resolved authentication flow bug, conducted code reviews for 2 pull requests, and aligned on Q3 product roadmap.</p>
+              <div className="flex gap-2">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6c9fff]/10 text-[#6c9fff] font-semibold">Auth</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#ff7085]/10 text-[#ff7085] font-semibold">🐛 bug</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Feature list */}
         <div className="bg-[#141820] border border-[#2a3040] rounded-2xl divide-y divide-[#2a3040]">
           {[
-            { icon: "✨", title: "Smart structuring", desc: "Raw notes → professional summaries automatically" },
+            { icon: "💬", title: "Standup in one click", desc: "Paste into Slack or Teams — done in 10 seconds" },
             { icon: "📋", title: "Brag sheet generator", desc: "Resume bullets ready for performance reviews" },
-            { icon: "💬", title: "Standup updates", desc: "One click, paste into Slack or Teams" },
             { icon: "📊", title: "Stats & streaks", desc: "See your work patterns and keep the habit" },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="flex items-start gap-3 px-5 py-3.5">

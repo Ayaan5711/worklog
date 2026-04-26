@@ -1,14 +1,17 @@
 import { createBrowserClient, createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://localhost:54321";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "placeholder";
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`Missing required environment variable: ${name}`);
+  return val;
+}
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
   return createServerClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY,
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
     {
       cookies: {
         getAll() { return cookieStore.getAll(); },
@@ -26,7 +29,7 @@ export async function createServerSupabaseClient() {
 
 export function createServiceClient() {
   return createBrowserClient(
-    SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder"
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requireEnv("SUPABASE_SERVICE_ROLE_KEY")
   );
 }

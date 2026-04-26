@@ -93,11 +93,16 @@ export default function StatsDashboard() {
 
   const maxProject = Math.max(...Object.values(projectCounts), 1);
   const streak = calcStreak(logs);
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const thisWeek = logs.filter(l => l.date >= weekAgo).length;
+  const activeDays = new Set(logs.map(l => l.date)).size;
 
   const generateWeekly = async () => {
     setWeeklyLoading(true); setWeeklySummary("");
     try {
-      const result = await api.ai.weekly({ style: promptStyle });
+      const to = new Date().toISOString().slice(0, 10);
+      const from = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+      const result = await api.ai.weekly({ from, to, style: promptStyle });
       setWeeklySummary(result.summary);
     } catch { toast.error("Failed to generate summary"); }
     setWeeklyLoading(false);
@@ -135,9 +140,9 @@ export default function StatsDashboard() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { v: logs.length, l: "Entries", c: "#6c9fff" },
-          { v: typeCounts.feature || 0, l: "Features", c: "#5ce0a0" },
-          { v: typeCounts.refactor || 0, l: "Refactors", c: "#b48cff" },
+          { v: logs.length, l: "Total Logs", c: "#6c9fff" },
+          { v: thisWeek, l: "This Week", c: "#5ce0a0" },
+          { v: activeDays, l: "Active Days", c: "#b48cff" },
           { v: Object.keys(projectCounts).length, l: "Projects", c: "#f0b860" },
         ].map(({ v, l, c }) => (
           <div key={l} className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 text-center">

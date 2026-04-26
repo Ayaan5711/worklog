@@ -25,8 +25,18 @@ export async function GET(req: NextRequest) {
   if (search) query = query.or(`summary.ilike.%${search}%,raw_input.ilike.%${search}%,project.ilike.%${search}%`);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[logs/GET]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
   return NextResponse.json(data);
+}
+
+export async function DELETE(_req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const db = createServiceClient();
+  const { error } = await db.from("logs").delete().eq("user_id", session.user.id);
+  if (error) { console.error("[logs/DELETE]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
+  return new NextResponse(null, { status: 204 });
 }
 
 export async function POST(req: NextRequest) {
@@ -58,6 +68,6 @@ export async function POST(req: NextRequest) {
   };
 
   const { data, error } = await db.from("logs").insert(log).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) { console.error("[logs/POST]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
   return NextResponse.json(data, { status: 201 });
 }
