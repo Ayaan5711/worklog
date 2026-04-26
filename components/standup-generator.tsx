@@ -65,10 +65,10 @@ export default function StandupGenerator() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">Daily Standup</h2>
-        <p className="text-sm text-[#8690a5] mt-0.5">Ready to paste into Teams or Slack</p>
+        <h2 className="text-xl font-semibold tracking-tight">Daily Standup</h2>
+        <p className="text-sm text-[#8690a5] mt-1">Ready to paste into Teams or Slack</p>
       </div>
 
       {whatsNext && (
@@ -81,7 +81,7 @@ export default function StandupGenerator() {
         </div>
       )}
 
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 space-y-3">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-4">
         <div className="flex gap-3 items-end flex-wrap">
           <div>
             <label className="block text-[10px] text-[#8690a5] mb-1">Date</label>
@@ -126,17 +126,17 @@ export default function StandupGenerator() {
       </div>
 
       {loading && (
-        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 space-y-2">
+        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-2">
           {[95, 80, 60].map((w, i) => <div key={i} className="h-3 bg-[#2a3040] rounded animate-pulse" style={{ width: `${w}%` }} />)}
         </div>
       )}
 
       {update && !loading && (
-        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
-          <p className="text-[11px] font-mono text-[#8690a5] mb-2">{fmtDate(date)}</p>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{update}</p>
+        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
+          <p className="text-[11px] font-mono text-[#8690a5] mb-3">{fmtDate(date)}</p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#cdd5e0]">{update}</p>
           <button onClick={() => { navigator.clipboard?.writeText(update); toast.success("Copied"); }}
-            className="mt-3 px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">
+            className="mt-4 px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">
             📋 Copy
           </button>
         </div>

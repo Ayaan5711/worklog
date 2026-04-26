@@ -65,7 +65,7 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
       </aside>
 
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-20 md:hidden bg-[#141820] border-b border-[#2a3040] flex items-center justify-between px-4 py-3">
+      <div className="fixed top-0 left-0 right-0 z-20 md:hidden bg-[#141820] border-b border-[#2a3040] flex items-center justify-between px-5 py-4">
         <h1 className="text-base font-bold font-mono">worklog<span className="text-[#6c9fff]">.</span>ai</h1>
         <button onClick={() => setMobileOpen(o => !o)} className="text-[#8690a5] hover:text-white p-1">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

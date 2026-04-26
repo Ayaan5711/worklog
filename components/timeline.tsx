@@ -72,9 +72,9 @@ export default function TimelinePage() {
   const hasFilters = filters.project || filters.type || filters.search || filters.from || filters.to;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Timeline</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Timeline</h2>
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-[#8690a5]">{displayed.length} entries</span>
           <button onClick={refresh} disabled={loading}
@@ -87,7 +87,7 @@ export default function TimelinePage() {
       </div>
 
       {/* Filters */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex gap-2 flex-wrap">
           <select value={filters.project} onChange={e => setFilter("project", e.target.value)}
             className="bg-[#141820] border border-[#2a3040] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
@@ -156,51 +156,51 @@ export default function TimelinePage() {
       )}
 
       {/* Grouped list */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {grouped.map(({ date, label, logs: dayLogs }) => (
           <div key={date}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-xs font-semibold text-[#8690a5]">{label}</span>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-xs font-semibold text-[#8690a5] uppercase tracking-wider">{label}</span>
               <div className="flex-1 h-px bg-[#2a3040]" />
               <span className="text-[10px] font-mono text-[#556]">{dayLogs.length}</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {dayLogs.map(log => (
                 <div key={log.id} className="flex gap-3 items-start">
-                  <div className="w-2 h-2 rounded-full mt-4 flex-shrink-0" style={{ background: TYPE_COLORS[log.type as LogType] || "#8690a5" }} />
-                  <div className="flex-1 bg-[#141820] border border-[#2a3040] rounded-xl px-4 py-3">
+                  <div className="w-2 h-2 rounded-full mt-[18px] flex-shrink-0" style={{ background: TYPE_COLORS[log.type as LogType] || "#8690a5" }} />
+                  <div className="group flex-1 bg-[#141820] border border-[#2a3040] rounded-xl px-5 py-4">
                     {editingId === log.id ? (
                       <div>
-                        <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={2}
-                          className="w-full bg-[#0c0f14] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white resize-none focus:outline-none" />
-                        <div className="flex gap-2 mt-2">
-                          <button onClick={() => handleSaveEdit(log)} className="px-3 py-1 bg-[#6c9fff] text-[#0c0f14] rounded text-xs font-semibold">Save with AI</button>
-                          <button onClick={() => setEditingId(null)} className="px-3 py-1 border border-[#2a3040] text-[#8690a5] rounded text-xs">Cancel</button>
+                        <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={3}
+                          className="w-full bg-[#0c0f14] border border-[#2a3040] rounded-lg px-3 py-2.5 text-sm text-white resize-none focus:outline-none" />
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={() => handleSaveEdit(log)} className="px-3 py-1.5 bg-[#6c9fff] text-[#0c0f14] rounded-lg text-xs font-semibold">Save with AI</button>
+                          <button onClick={() => setEditingId(null)} className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">Cancel</button>
                         </div>
                       </div>
                     ) : confirmDeleteId === log.id ? (
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-[#8690a5]">Delete this entry?</span>
                         <div className="flex gap-2">
-                          <button onClick={() => handleDelete(log.id)} className="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded text-xs font-semibold">Delete</button>
-                          <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1 border border-[#2a3040] text-[#8690a5] rounded text-xs">Cancel</button>
+                          <button onClick={() => handleDelete(log.id)} className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold">Delete</button>
+                          <button onClick={() => setConfirmDeleteId(null)} className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">Cancel</button>
                         </div>
                       </div>
                     ) : (
                       <>
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex gap-1.5 flex-wrap">
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6c9fff]/08 text-[#6c9fff] font-semibold">{log.project}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${TYPE_COLORS[log.type as LogType] || "#8690a5"}14`, color: TYPE_COLORS[log.type as LogType] || "#8690a5" }}>
+                            <span className="text-[10px] px-2.5 py-1 rounded-full bg-[#6c9fff]/08 text-[#6c9fff] font-semibold">{log.project}</span>
+                            <span className="text-[10px] px-2.5 py-1 rounded-full font-semibold" style={{ background: `${TYPE_COLORS[log.type as LogType] || "#8690a5"}14`, color: TYPE_COLORS[log.type as LogType] || "#8690a5" }}>
                               {TYPE_ICONS[log.type as LogType] || "📝"} {log.type}
                             </span>
                           </div>
-                          <div className="flex gap-1 opacity-40 hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditingId(log.id); setEditText(log.raw_input); }} className="text-xs px-1.5 py-0.5 hover:bg-white/5 rounded" title="Edit">✏️</button>
-                            <button onClick={() => setConfirmDeleteId(log.id)} className="text-xs px-1.5 py-0.5 hover:bg-white/5 rounded" title="Delete">🗑️</button>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                            <button onClick={() => { setEditingId(log.id); setEditText(log.raw_input); }} className="text-xs px-2 py-1 text-[#556] hover:text-white hover:bg-white/5 rounded-lg transition-colors" title="Edit">✏️</button>
+                            <button onClick={() => setConfirmDeleteId(log.id)} className="text-xs px-2 py-1 text-[#556] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete">🗑️</button>
                           </div>
                         </div>
-                        <p className="text-sm leading-snug text-[#cdd5e0]">{log.summary}</p>
+                        <p className="text-sm leading-relaxed text-[#cdd5e0]">{log.summary}</p>
                       </>
                     )}
                   </div>

@@ -81,13 +81,13 @@ export default function BragSheet() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">Brag Sheet</h2>
-        <p className="text-sm text-[#8690a5] mt-0.5">Resume-ready accomplishment bullets from your logs</p>
+        <h2 className="text-xl font-semibold tracking-tight">Brag Sheet</h2>
+        <p className="text-sm text-[#8690a5] mt-1">Resume-ready accomplishment bullets from your logs</p>
       </div>
 
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 space-y-3">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-[10px] text-[#8690a5] mb-1">From</label>
@@ -106,7 +106,7 @@ export default function BragSheet() {
       </div>
 
       {loading && (
-        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-4">
+        <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-6 space-y-4">
           {[1,2,3,4].map(i => (
             <div key={i} className="flex gap-3 items-start">
               <div className="w-5 h-5 rounded-full bg-[#2a3040] animate-pulse flex-shrink-0 mt-0.5" />
@@ -122,9 +122,9 @@ export default function BragSheet() {
       {bullets.length > 0 && !loading && (
         <div className="bg-[#141820] border border-[#2a3040] rounded-xl overflow-hidden">
           <div className="h-0.5 bg-gradient-to-r from-[#6c9fff] via-[#5ce0a0] to-[#b48cff]" />
-          <div className="p-5 space-y-0">
+          <div className="px-6 pt-5 pb-2 space-y-0">
             {bullets.map((b, i) => (
-              <div key={i} className="flex gap-4 py-3.5 border-b border-[#1e2535] last:border-0">
+              <div key={i} className="flex gap-4 py-4 border-b border-[#1e2535] last:border-0">
                 <span className="text-[10px] font-bold font-mono text-[#6c9fff] bg-[#6c9fff]/10 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
                   {i + 1}
                 </span>
@@ -132,7 +132,7 @@ export default function BragSheet() {
               </div>
             ))}
           </div>
-          <div className="px-5 pb-4 flex items-center justify-between">
+          <div className="px-6 pb-5 flex items-center justify-between">
             <span className="text-[10px] text-[#556]">{bullets.length} accomplishments</span>
             <button onClick={copyAll}
               className="px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">

@@ -74,11 +74,11 @@ export default function DataManager() {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Data</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">Data</h2>
 
       {/* Export */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-2">
           <span>💾</span><span className="text-sm font-semibold">Export</span>
         </div>
@@ -94,7 +94,7 @@ export default function DataManager() {
       </div>
 
       {/* Import */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-2">
           <span>📂</span><span className="text-sm font-semibold">Import</span>
         </div>
@@ -113,7 +113,7 @@ export default function DataManager() {
       </div>
 
       {/* Tips */}
-      <div className="bg-[#141820] border border-[#6c9fff]/15 rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#6c9fff]/15 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <span>💡</span><span className="text-sm font-semibold">Tips for daily use</span>
         </div>

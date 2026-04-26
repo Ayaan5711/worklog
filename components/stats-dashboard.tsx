@@ -104,8 +104,8 @@ export default function StatsDashboard() {
   };
 
   if (initialLoading) return (
-    <div className="space-y-5">
-      <h2 className="text-lg font-semibold">Stats</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">Stats</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[1,2,3,4].map(i => <div key={i} className="h-20 bg-[#141820] rounded-xl animate-pulse" />)}
       </div>
@@ -115,8 +115,8 @@ export default function StatsDashboard() {
   );
 
   if (logs.length === 0) return (
-    <div className="space-y-5">
-      <h2 className="text-lg font-semibold">Stats</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">Stats</h2>
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="text-4xl mb-4">📊</div>
         <h3 className="text-base font-semibold mb-1">No data yet</h3>
@@ -129,8 +129,8 @@ export default function StatsDashboard() {
   );
 
   return (
-    <div className="space-y-5">
-      <h2 className="text-lg font-semibold">Stats</h2>
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold tracking-tight">Stats</h2>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -140,15 +140,15 @@ export default function StatsDashboard() {
           { v: typeCounts.refactor || 0, l: "Refactors", c: "#b48cff" },
           { v: Object.keys(projectCounts).length, l: "Projects", c: "#f0b860" },
         ].map(({ v, l, c }) => (
-          <div key={l} className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold font-mono" style={{ color: c }}>{v}</div>
-            <div className="text-[10px] uppercase tracking-wider text-[#8690a5] mt-0.5">{l}</div>
+          <div key={l} className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 text-center">
+            <div className="text-3xl font-bold font-mono" style={{ color: c }}>{v}</div>
+            <div className="text-[10px] uppercase tracking-wider text-[#8690a5] mt-1">{l}</div>
           </div>
         ))}
       </div>
 
       {/* Streak */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 flex items-center gap-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 flex items-center gap-4">
         <div className="text-3xl">{streak >= 7 ? "🔥" : streak >= 3 ? "⚡" : "📅"}</div>
         <div>
           <div className="text-2xl font-bold font-mono text-[#f0b860]">{streak} <span className="text-base font-semibold">day{streak !== 1 ? "s" : ""}</span></div>
@@ -157,12 +157,12 @@ export default function StatsDashboard() {
       </div>
 
       {/* Activity heatmap */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <ActivityHeatmap logs={logs} />
       </div>
 
       {/* Weekly summary */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4 space-y-3">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
           <span>📊</span>
           <span className="text-sm font-semibold">Weekly Summary</span>
@@ -188,9 +188,9 @@ export default function StatsDashboard() {
       </div>
 
       {/* By project */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <h3 className="text-sm font-semibold mb-4">By project</h3>
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {Object.entries(projectCounts).sort((a, b) => b[1] - a[1]).map(([proj, count]) => (
             <div key={proj} className="flex items-center gap-3">
               <span className="text-[11px] text-[#8690a5] w-24 text-right flex-shrink-0 truncate">{proj}</span>
@@ -204,7 +204,7 @@ export default function StatsDashboard() {
       </div>
 
       {/* By type */}
-      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-4">
+      <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <h3 className="text-sm font-semibold mb-4">By type</h3>
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
           {Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
