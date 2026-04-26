@@ -6,7 +6,7 @@ import { PlusCircle, List, Star, MessageSquare, BarChart2, Database, LogOut } fr
 
 const NAV = [
   { href: "/log",       label: "New Log",    icon: PlusCircle },
-  { href: "/dashboard", label: "Timeline",   icon: List },
+  { href: "/timeline",  label: "Timeline",   icon: List },
   { href: "/brag",      label: "Brag Sheet", icon: Star },
   { href: "/standup",   label: "Standup",    icon: MessageSquare },
   { href: "/stats",     label: "Stats",      icon: BarChart2 },
@@ -29,7 +29,7 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         {NAV.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+          const active = pathname === href || (href !== "/timeline" && pathname.startsWith(href));
           return (
             <Link
               key={href}

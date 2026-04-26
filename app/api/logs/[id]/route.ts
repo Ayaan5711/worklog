@@ -20,8 +20,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       body.summary = structured.summary;
       body.project = body.project_override || structured.project;
       body.type = body.type_override || structured.type;
-      body.tags = structured.tags;
-      body.impact = structured.impact;
     } else {
       body.summary = cleanSummaryFallback(body.raw_input);
       body.project = body.project_override || inferProjectFallback(body.raw_input);

@@ -36,13 +36,18 @@ export default function DataManager() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
-        const imported = JSON.parse(ev.target?.result as string) as Partial<Log>[];
+        const imported = JSON.parse(ev.target?.result as string) as (Partial<Log> & { project_override?: string; type_override?: string })[];
         if (!Array.isArray(imported)) throw new Error("Not an array");
         let added = 0;
         for (const entry of imported) {
           if (!entry.raw_input || !entry.date) continue;
           if (logs.some(l => l.date === entry.date && l.raw_input === entry.raw_input)) continue;
-          await api.logs.create({ raw_input: entry.raw_input, date: entry.date });
+          await api.logs.create({
+            raw_input: entry.raw_input,
+            date: entry.date,
+            project_override: entry.project_override,
+            type_override: entry.type_override as Log["type"],
+          });
           added++;
         }
         const fresh = await api.logs.list();

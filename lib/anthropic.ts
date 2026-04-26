@@ -1,9 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { LogType, PromptStyle, StructuredLog } from "./types";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const MODEL = "claude-sonnet-4-5";
 
-const MODEL = "claude-sonnet-4-20250514";
+function getClient() {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+  return new Anthropic({ apiKey });
+}
 
 const styleText: Record<PromptStyle, string> = {
   professional: "Write in polished professional language suitable for performance reviews and manager updates.",
@@ -16,6 +20,9 @@ export async function structureLog(
   existingProjects: string[],
   style: PromptStyle = "professional"
 ): Promise<StructuredLog | null> {
+  const client = getClient();
+  if (!client) return null;
+
   const projectHint = existingProjects.length
     ? `Existing projects: ${existingProjects.join(", ")}. Reuse if applicable.`
     : "";
@@ -63,6 +70,9 @@ export async function generateBragSheet(
   logsText: string,
   style: PromptStyle = "professional"
 ): Promise<string[] | null> {
+  const client = getClient();
+  if (!client) return null;
+
   try {
     const msg = await client.messages.create({
       model: MODEL,
@@ -101,6 +111,9 @@ export async function generateStandup(
   logsText: string,
   style: PromptStyle = "professional"
 ): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
   try {
     const msg = await client.messages.create({
       model: MODEL,
@@ -129,6 +142,9 @@ export async function generateWeeklySummary(
   logsText: string,
   style: PromptStyle = "professional"
 ): Promise<string | null> {
+  const client = getClient();
+  if (!client) return null;
+
   try {
     const msg = await client.messages.create({
       model: MODEL,

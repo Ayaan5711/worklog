@@ -54,9 +54,6 @@ export async function POST(req: NextRequest) {
     summary: structured?.summary || cleanSummaryFallback(raw_input),
     project: project_override || structured?.project || inferProjectFallback(raw_input),
     type: type_override || structured?.type || inferTypeFallback(raw_input),
-    tags: structured?.tags || [],
-    impact: structured?.impact || null,
-    is_private: false,
   };
 
   const { data, error } = await db.from("logs").insert(log).select().single();

@@ -1,8 +1,5 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
-import { SupabaseAdapter } from "@auth/supabase-adapter";
-import jwt from "jsonwebtoken";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -10,30 +7,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET,
-    }),
   ],
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://localhost:54321",
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "placeholder",
-  }),
+  session: { strategy: "jwt" },
   callbacks: {
-    async session({ session, user }) {
-      // Attach Supabase access token so client can make auth'd queries
-      const signingSecret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (signingSecret) {
-        const payload = {
-          aud: "authenticated",
-          exp: Math.floor(new Date(session.expires).getTime() / 1000),
-          sub: user.id,
-          email: user.email,
-          role: "authenticated",
-        };
-        session.supabaseAccessToken = jwt.sign(payload, signingSecret);
-      }
-      session.user.id = user.id;
+    async session({ session, token }) {
+      session.user.id = token.sub as string;
       return session;
     },
   },
@@ -44,7 +22,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 declare module "next-auth" {
   interface Session {
-    supabaseAccessToken?: string;
     user: {
       id: string;
       name?: string | null;

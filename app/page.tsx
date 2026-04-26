@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
   const session = await auth();
-  if (session) redirect("/dashboard");
+  if (session) redirect("/log");
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4 bg-[#0c0f14]">
@@ -18,7 +18,7 @@ export default async function LandingPage() {
 
         <div className="bg-[#141820] border border-[#2a3040] rounded-2xl p-8 space-y-4 text-left">
           <p className="text-[#8690a5] text-sm leading-relaxed">
-            Type what you did in plain language — Claude turns it into structured, resume-ready
+            Type what you did in plain language — Ai turns it into structured, resume-ready
             documentation. Generate brag sheets, standup updates, and weekly summaries in seconds.
           </p>
           <ul className="space-y-2 text-sm text-[#8690a5]">
@@ -40,7 +40,7 @@ export default async function LandingPage() {
         >
           Get started — it&apos;s free
         </Link>
-        <p className="text-xs text-[#556]">Sign in with Google or GitHub. No credit card required.</p>
+        <p className="text-xs text-[#556]">Sign in with Google. No credit card required.</p>
       </div>
     </main>
   );

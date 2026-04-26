@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
     summary: cleanSummaryFallback(raw_input),
     project: inferProjectFallback(raw_input),
     type: inferTypeFallback(raw_input),
-    tags: [],
-    impact: null,
     fallback: true,
   });
 }

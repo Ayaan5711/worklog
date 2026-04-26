@@ -10,9 +10,6 @@ export interface Log {
   summary: string;
   project: string;
   type: LogType;
-  tags: string[];
-  impact: string | null;
-  is_private: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -28,8 +25,6 @@ export interface StructuredLog {
   summary: string;
   project: string;
   type: LogType;
-  tags: string[];
-  impact: string;
 }
 
 export interface Profile {
