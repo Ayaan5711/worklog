@@ -1,6 +1,6 @@
 import type { LogType, PromptStyle, StructuredLog } from "./types";
 
-const MODEL = "llama-3.1-8b-instant";
+const MODEL = "llama-3.3-70b-versatile";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const styleText: Record<PromptStyle, string> = {
@@ -53,6 +53,7 @@ Return ONLY valid JSON:
 }
 
 Rules:
+- PRESERVE all specific details: ticket numbers (e.g. GPB-1234, JIRA-56), system names, error names, version numbers, tool names — never omit or generalize these
 - building/implementing = "feature", fixing = "bug", redesigning/restructuring = "refactor"
 - Capitalize properly, end summary with period
 - Return ONLY the JSON, no markdown fences`);
