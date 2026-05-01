@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { PlusCircle, List, Star, MessageSquare, BarChart2, Database, LogOut, Menu, X } from "lucide-react";
+import { useLogStore } from "@/lib/store";
+import type { PromptStyle } from "@/lib/types";
 
 const NAV = [
   { href: "/log",       label: "New Log",    icon: PlusCircle },
@@ -17,6 +19,12 @@ const NAV = [
 export default function SideNav({ user }: { user: { name?: string | null; email?: string | null; image?: string | null } }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { setPromptStyle } = useLogStore();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("worklog_prompt_style") as PromptStyle | null;
+    if (saved) setPromptStyle(saved);
+  }, []);
 
   const navLinks = (
     <nav className="flex-1 px-3 py-5 space-y-1">
@@ -100,6 +108,15 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
           );
         })}
       </nav>
+
+      {/* Floating + button — desktop only, hidden on /log since form is already there */}
+      {pathname !== "/log" && (
+        <Link href="/log"
+          className="fixed bottom-6 right-6 z-30 hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#6c9fff] to-[#5ce0a0] shadow-lg hover:scale-105 transition-transform"
+          title="New log">
+          <PlusCircle className="w-5 h-5 text-[#0c0f14]" />
+        </Link>
+      )}
     </>
   );
 }

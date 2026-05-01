@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
   if (type) query = query.eq("type", type);
   if (from) query = query.gte("date", from);
   if (to) query = query.lte("date", to);
-  if (search) query = query.or(`summary.ilike.%${search}%,raw_input.ilike.%${search}%,project.ilike.%${search}%`);
+  if (search) {
+    const esc = search.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+    query = query.or(`summary.ilike.%${esc}%,raw_input.ilike.%${esc}%,project.ilike.%${esc}%`);
+  }
 
   const { data, error } = await query;
   if (error) { console.error("[logs/GET]", error.message); return NextResponse.json({ error: "Internal server error" }, { status: 500 }); }
@@ -44,27 +47,38 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body: CreateLogInput & { style?: PromptStyle } = await req.json();
-  const { date, raw_input, project_override, type_override, style = "professional" } = body;
+  const { date, raw_input, project_override, type_override, summary_override, style = "professional" } = body;
 
   if (!raw_input?.trim()) return NextResponse.json({ error: "raw_input required" }, { status: 400 });
   if (raw_input.length > 2000) return NextResponse.json({ error: "raw_input too long (max 2000 chars)" }, { status: 400 });
 
   const db = createServiceClient();
 
-  // Get existing projects for context
-  const { data: existing } = await db.from("logs").select("project").eq("user_id", session.user.id);
-  const existingProjects = [...new Set((existing ?? []).map(l => l.project))];
+  let summary: string;
+  let project: string;
+  let type: string;
 
-  // Structure with Claude (falls back to keyword inference)
-  const structured = await structureLog(raw_input, existingProjects, style);
+  if (summary_override && project_override && type_override) {
+    // Fast path: caller supplied all fields, skip AI entirely
+    summary = summary_override.trim();
+    project = project_override;
+    type = type_override;
+  } else {
+    const { data: existing } = await db.from("logs").select("project").eq("user_id", session.user.id);
+    const existingProjects = [...new Set((existing ?? []).map(l => l.project))];
+    const structured = await structureLog(raw_input, existingProjects, style);
+    summary = summary_override?.trim() || structured?.summary || cleanSummaryFallback(raw_input);
+    project = project_override || structured?.project || inferProjectFallback(raw_input);
+    type = type_override || structured?.type || inferTypeFallback(raw_input);
+  }
 
   const log = {
     user_id: session.user.id,
     date: date || new Date().toISOString().slice(0, 10),
     raw_input: raw_input.trim(),
-    summary: structured?.summary || cleanSummaryFallback(raw_input),
-    project: project_override || structured?.project || inferProjectFallback(raw_input),
-    type: type_override || structured?.type || inferTypeFallback(raw_input),
+    summary,
+    project,
+    type,
   };
 
   const { data, error } = await db.from("logs").insert(log).select().single();

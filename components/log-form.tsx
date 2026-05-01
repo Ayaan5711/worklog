@@ -179,7 +179,12 @@ export default function LogForm() {
             <p className={`text-[10px] ${saveFailed ? "text-red-400" : "text-[#3a4258]"}`}>
               {saveFailed ? "Save failed — your entry is still here, try again" : "Ctrl+Enter to save"}
             </p>
-            {rawInput && !saveFailed && <p className="text-[10px] text-[#3a4258]">Draft saved</p>}
+            <div className="flex items-center gap-2">
+              {rawInput && !saveFailed && <p className="text-[10px] text-[#3a4258]">Draft saved</p>}
+              <p className={`text-[10px] font-mono ${rawInput.length > 1800 ? "text-red-400" : rawInput.length > 1500 ? "text-[#f0b860]" : "text-[#3a4258]"}`}>
+                {rawInput.length} / 2000
+              </p>
+            </div>
           </div>
         </div>
 

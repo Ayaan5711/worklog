@@ -3,11 +3,15 @@ import { auth } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase";
 import { generateBragSheet } from "@/lib/anthropic";
 import { safeStyle } from "@/lib/types";
+import { rateLimit } from "@/lib/rate-limit";
 import type { Log, PromptStyle } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (!rateLimit(`ai:${session.user.id}`, 20, 60_000))
+    return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 });
 
   const { from, to, projects, style }: {
     from?: string; to?: string; projects?: unknown; style?: unknown;

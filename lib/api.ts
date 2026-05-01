@@ -11,6 +11,9 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  account: {
+    delete: () => request<void>("/api/account", { method: "DELETE" }),
+  },
   logs: {
     list: (params?: Record<string, string>) => {
       const qs = params ? "?" + new URLSearchParams(params).toString() : "";

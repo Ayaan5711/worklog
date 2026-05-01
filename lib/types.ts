@@ -19,6 +19,7 @@ export interface CreateLogInput {
   raw_input: string;
   project_override?: string;
   type_override?: LogType;
+  summary_override?: string;
 }
 
 export interface StructuredLog {

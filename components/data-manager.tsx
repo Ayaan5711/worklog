@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Log } from "@/lib/types";
@@ -13,6 +14,9 @@ export default function DataManager() {
   const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [fastImport, setFastImport] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleDeleteAll = async () => {
@@ -24,6 +28,19 @@ export default function DataManager() {
       toast.success("All data deleted");
     } catch { toast.error("Failed to delete"); }
     setClearing(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await api.account.delete();
+      toast.success("Account deleted. Signing out...");
+      await signOut({ callbackUrl: "/" });
+    } catch {
+      toast.error("Failed to delete account");
+      setDeletingAccount(false);
+      setConfirmDeleteAccount(false);
+    }
   };
 
   useEffect(() => {
@@ -69,8 +86,9 @@ export default function DataManager() {
           await Promise.all(slice.map(entry => api.logs.create({
             raw_input: entry.raw_input!,
             date: entry.date!,
-            project_override: entry.project_override,
-            type_override: entry.type_override as Log["type"],
+            project_override: entry.project || entry.project_override,
+            type_override: (entry.type || entry.type_override) as Log["type"],
+            ...(fastImport && entry.summary ? { summary_override: entry.summary } : {}),
           })));
           added += slice.length;
           setImportProgress({ current: Math.min(i + BATCH, toImport.length), total: toImport.length });
@@ -113,6 +131,15 @@ export default function DataManager() {
           <span>📂</span><span className="text-sm font-semibold">Import</span>
         </div>
         <p className="text-xs text-[#8690a5] mb-3">Restore from a JSON backup. Duplicates are skipped.</p>
+        <div className="flex items-center gap-2 mb-3">
+          <button type="button" onClick={() => setFastImport(o => !o)}
+            className={`relative w-8 h-4 rounded-full transition-colors ${fastImport ? "bg-[#6c9fff]" : "bg-[#2a3040]"}`}>
+            <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${fastImport ? "translate-x-4" : "translate-x-0.5"}`} />
+          </button>
+          <span className="text-xs text-[#8690a5]">
+            {fastImport ? "Fast restore (keep existing summaries)" : "Re-analyze with AI (slower, uses API quota)"}
+          </span>
+        </div>
         <label className={`px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold cursor-pointer hover:bg-[#6c9fff]/15 transition-colors inline-block ${importProgress ? "opacity-50 pointer-events-none" : ""}`}>
           {importProgress ? `Importing ${importProgress.current}/${importProgress.total}...` : "Choose JSON file"}
           <input ref={fileRef} type="file" accept=".json" onChange={importJSON} className="hidden" disabled={!!importProgress} />
@@ -127,29 +154,55 @@ export default function DataManager() {
       </div>
 
       {/* Danger zone */}
-      <div className="bg-[#141820] border border-red-500/20 rounded-xl p-5">
+      <div className="bg-[#141820] border border-red-500/20 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <span>⚠️</span><span className="text-sm font-semibold text-red-400">Danger Zone</span>
         </div>
-        <p className="text-xs text-[#8690a5] mb-3">Permanently delete all your logs. This cannot be undone.</p>
-        {!confirmClear ? (
-          <button onClick={() => setConfirmClear(true)} disabled={logs.length === 0}
-            className="px-4 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors disabled:opacity-40">
-            Delete all data ({logs.length} entries)
-          </button>
-        ) : (
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-[#8690a5]">Are you sure? This is permanent.</span>
-            <button onClick={handleDeleteAll} disabled={clearing}
-              className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
-              {clearing ? "Deleting..." : "Yes, delete all"}
+
+        {/* Delete all logs */}
+        <div>
+          <p className="text-xs text-[#8690a5] mb-2">Permanently delete all your logs. Your account remains active.</p>
+          {!confirmClear ? (
+            <button onClick={() => setConfirmClear(true)} disabled={logs.length === 0}
+              className="px-4 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors disabled:opacity-40">
+              Delete all logs ({logs.length} entries)
             </button>
-            <button onClick={() => setConfirmClear(false)}
-              className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">
-              Cancel
+          ) : (
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm text-[#8690a5]">Are you sure? This is permanent.</span>
+              <button onClick={handleDeleteAll} disabled={clearing}
+                className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
+                {clearing ? "Deleting..." : "Yes, delete all logs"}
+              </button>
+              <button onClick={() => setConfirmClear(false)}
+                className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-red-500/10 pt-4">
+          <p className="text-xs text-[#8690a5] mb-2">Permanently delete your account and all associated data. You will be signed out immediately.</p>
+          {!confirmDeleteAccount ? (
+            <button onClick={() => setConfirmDeleteAccount(true)}
+              className="px-4 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors">
+              Delete account
             </button>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm text-[#8690a5]">This deletes everything. Cannot be undone.</span>
+              <button onClick={handleDeleteAccount} disabled={deletingAccount}
+                className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
+                {deletingAccount ? "Deleting..." : "Yes, delete my account"}
+              </button>
+              <button onClick={() => setConfirmDeleteAccount(false)} disabled={deletingAccount}
+                className="px-3 py-1.5 border border-[#2a3040] text-[#8690a5] rounded-lg text-xs">
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tips */}

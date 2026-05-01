@@ -86,7 +86,7 @@ export default function BragSheet() {
         style: promptStyle,
       });
       setBullets(result.bullets ?? []);
-    } catch { toast.error("Failed to generate brag sheet"); }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to generate brag sheet"); }
     setLoading(false);
   };
 

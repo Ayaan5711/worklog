@@ -104,7 +104,7 @@ export default function StatsDashboard() {
       const from = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
       const result = await api.ai.weekly({ from, to, style: promptStyle });
       setWeeklySummary(result.summary);
-    } catch { toast.error("Failed to generate summary"); }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to generate summary"); }
     setWeeklyLoading(false);
   };
 

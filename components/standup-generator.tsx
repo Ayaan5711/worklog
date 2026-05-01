@@ -75,7 +75,7 @@ export default function StandupGenerator() {
       if (whatsNext && (target === today || target === yesterday)) text += `\n\nToday: ${whatsNext}`;
       setUpdate(text);
       if (d) setDate(d);
-    } catch { toast.error("Failed to generate standup"); }
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to generate standup"); }
     setLoading(false);
   };
 
