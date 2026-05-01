@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!rateLimit(`ai:${session.user.id}`, 20, 60_000))
+  if (!await rateLimit(`ai:${session.user.id}`))
     return NextResponse.json({ error: "Too many requests. Please wait a moment." }, { status: 429 });
 
   const { from, to, style }: { from?: string; to?: string; style?: unknown } = await req.json();

@@ -69,6 +69,12 @@ export default async function LandingPage() {
           <p className="text-center text-xs text-[#556]">Sign in with Google · No credit card required</p>
         </div>
 
+        <p className="text-center text-[10px] text-[#3a4258]">
+          <Link href="/privacy" className="hover:text-[#556] transition-colors">Privacy Policy</Link>
+          {" · "}
+          <Link href="/terms" className="hover:text-[#556] transition-colors">Terms of Service</Link>
+        </p>
+
       </div>
     </main>
   );

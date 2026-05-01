@@ -1,19 +1,25 @@
-// Sliding-window in-memory rate limiter.
-// Works for single-server / Docker deployments.
-// For Vercel serverless: swap this with @upstash/ratelimit + Redis.
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-const store = new Map<string, { count: number; reset: number }>();
+let rl: Ratelimit | null = null;
 
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
-  const now = Date.now();
-  const entry = store.get(key);
+function getRateLimiter(): Ratelimit | null {
+  if (rl) return rl;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return null;
+  rl = new Ratelimit({
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    }),
+    limiter: Ratelimit.slidingWindow(20, "60 s"),
+    prefix: "worklog:rl",
+  });
+  return rl;
+}
 
-  if (!entry || now > entry.reset) {
-    store.set(key, { count: 1, reset: now + windowMs });
-    return true;
-  }
-
-  if (entry.count >= limit) return false;
-  entry.count++;
-  return true;
+export async function rateLimit(key: string): Promise<boolean> {
+  const limiter = getRateLimiter();
+  if (!limiter) return true; // no Redis configured — allow through
+  const { success } = await limiter.limit(key);
+  return success;
 }
