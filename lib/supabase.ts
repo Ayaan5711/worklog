@@ -28,8 +28,9 @@ export async function createServerSupabaseClient() {
 }
 
 export function createServiceClient() {
-  return createBrowserClient(
+  return createServerClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("SUPABASE_SERVICE_ROLE_KEY")
+    requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    { cookies: { getAll: () => [], setAll: () => {} } }
   );
 }

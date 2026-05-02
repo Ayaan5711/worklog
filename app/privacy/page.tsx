@@ -1,13 +1,13 @@
 import Link from "next/link";
 
-export const metadata = { title: "Privacy Policy — worklog.ai" };
+export const metadata = { title: "Privacy Policy — worklog.space" };
 
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-[#0c0f14] text-[#cdd5e0] px-4 py-16">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <Link href="/" className="text-xs text-[#6c9fff] hover:underline mb-6 inline-block">← worklog.ai</Link>
+          <Link href="/" className="text-xs text-[#6c9fff] hover:underline mb-6 inline-block">← worklog.space</Link>
           <h1 className="text-3xl font-bold font-mono tracking-tight">Privacy Policy</h1>
           <p className="text-sm text-[#8690a5] mt-2">Last updated: May 2025</p>
         </div>
@@ -31,8 +31,8 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">AI processing</h2>
           <p className="text-sm text-[#8690a5] leading-relaxed">
-            Your log entries are sent to Google Gemini to generate structured summaries. This is processed server-side.
-            Please review <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#6c9fff] hover:underline">Google&apos;s privacy policy</a> for information on how they handle API data.
+            Your log entries are sent to Groq&apos;s API to generate structured summaries. This is processed server-side.
+            Please review <a href="https://groq.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#6c9fff] hover:underline">Groq&apos;s privacy policy</a> for information on how they handle API data.
           </p>
         </section>
 

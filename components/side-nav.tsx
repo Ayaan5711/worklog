@@ -64,11 +64,14 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
     <>
       {/* Desktop sidebar */}
       <aside className="fixed left-0 top-0 h-full w-60 bg-[#141820] border-r border-[#2a3040] flex-col hidden md:flex z-20">
-        <div className="px-5 py-6 border-b border-[#2a3040]">
-          <Link href="/log">
-            <h1 className="text-lg font-bold font-mono tracking-tight hover:text-[#6c9fff] transition-colors">worklog<span className="text-[#6c9fff]">.</span>ai</h1>
+        <div className="px-5 py-5 border-b border-[#2a3040]">
+          <Link href="/log" className="flex items-center gap-2.5 group">
+            <img src="/icon.svg" alt="" className="w-7 h-7 rounded-lg flex-shrink-0" />
+            <div>
+              <h1 className="text-sm font-bold font-mono tracking-tight group-hover:text-[#6c9fff] transition-colors">worklog<span className="text-[#6c9fff]">.</span>space</h1>
+              <p className="text-[10px] text-[#556]">AI work tracker</p>
+            </div>
           </Link>
-          <p className="text-xs text-[#8690a5] mt-1">AI work tracker</p>
         </div>
         {navLinks}
         {userSection}
@@ -76,7 +79,10 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
 
       {/* Mobile top bar */}
       <div className="fixed top-0 left-0 right-0 z-20 md:hidden bg-[#141820] border-b border-[#2a3040] flex items-center justify-between px-5 py-4">
-        <Link href="/log"><h1 className="text-base font-bold font-mono hover:text-[#6c9fff] transition-colors">worklog<span className="text-[#6c9fff]">.</span>ai</h1></Link>
+        <Link href="/log" className="flex items-center gap-2">
+          <img src="/icon.svg" alt="" className="w-6 h-6 rounded-md" />
+          <h1 className="text-sm font-bold font-mono hover:text-[#6c9fff] transition-colors">worklog<span className="text-[#6c9fff]">.</span>space</h1>
+        </Link>
         <button onClick={() => setMobileOpen(o => !o)} className="text-[#8690a5] hover:text-white p-1">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>

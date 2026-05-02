@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
+import { Download, FolderOpen, AlertTriangle, Lightbulb } from "lucide-react";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import type { Log } from "@/lib/types";
@@ -70,6 +71,11 @@ export default function DataManager() {
   const importJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large (max 5 MB)");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = async (ev) => {
       try {
@@ -112,7 +118,7 @@ export default function DataManager() {
       {/* Export */}
       <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-2">
-          <span>💾</span><span className="text-sm font-semibold">Export</span>
+          <Download className="w-4 h-4 text-[#6c9fff]" /><span className="text-sm font-semibold">Export</span>
         </div>
         <p className="text-xs text-[#8690a5] mb-3">Download a backup of all your logs.</p>
         <div className="flex gap-2 flex-wrap">
@@ -128,7 +134,7 @@ export default function DataManager() {
       {/* Import */}
       <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-2">
-          <span>📂</span><span className="text-sm font-semibold">Import</span>
+          <FolderOpen className="w-4 h-4 text-[#6c9fff]" /><span className="text-sm font-semibold">Import</span>
         </div>
         <p className="text-xs text-[#8690a5] mb-3">Restore from a JSON backup. Duplicates are skipped.</p>
         <div className="flex items-center gap-2 mb-3">
@@ -156,7 +162,7 @@ export default function DataManager() {
       {/* Danger zone */}
       <div className="bg-[#141820] border border-red-500/20 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2 mb-2">
-          <span>⚠️</span><span className="text-sm font-semibold text-red-400">Danger Zone</span>
+          <AlertTriangle className="w-4 h-4 text-red-400" /><span className="text-sm font-semibold text-red-400">Danger Zone</span>
         </div>
 
         {/* Delete all logs */}
@@ -208,7 +214,7 @@ export default function DataManager() {
       {/* Tips */}
       <div className="bg-[#141820] border border-[#6c9fff]/15 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
-          <span>💡</span><span className="text-sm font-semibold">Tips for daily use</span>
+          <Lightbulb className="w-4 h-4 text-[#6c9fff]" /><span className="text-sm font-semibold">Tips for daily use</span>
         </div>
         <ol className="space-y-2 text-xs text-[#8690a5] leading-relaxed">
           <li><strong className="text-white">1. End of day</strong> — go to New Log, type what you did. AI polishes it.</li>

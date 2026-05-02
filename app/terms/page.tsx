@@ -1,13 +1,13 @@
 import Link from "next/link";
 
-export const metadata = { title: "Terms of Service — worklog.ai" };
+export const metadata = { title: "Terms of Service — worklog.space" };
 
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-[#0c0f14] text-[#cdd5e0] px-4 py-16">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <Link href="/" className="text-xs text-[#6c9fff] hover:underline mb-6 inline-block">← worklog.ai</Link>
+          <Link href="/" className="text-xs text-[#6c9fff] hover:underline mb-6 inline-block">← worklog.space</Link>
           <h1 className="text-3xl font-bold font-mono tracking-tight">Terms of Service</h1>
           <p className="text-sm text-[#8690a5] mt-2">Last updated: May 2025</p>
         </div>
@@ -15,14 +15,14 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Acceptance</h2>
           <p className="text-sm text-[#8690a5] leading-relaxed">
-            By using worklog.ai, you agree to these terms. If you do not agree, do not use the service.
+            By using worklog.space, you agree to these terms. If you do not agree, do not use the service.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">The service</h2>
           <p className="text-sm text-[#8690a5] leading-relaxed">
-            worklog.ai is a work log tracking tool that uses AI to structure your entries and generate professional summaries.
+            worklog.space is a work log tracking tool that uses AI to structure your entries and generate professional summaries.
             We provide the service as-is. Features may change without notice.
           </p>
         </section>

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { BarChart2, Clipboard } from "lucide-react";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import { TYPE_COLORS, TYPE_ICONS } from "@/lib/constants";
@@ -123,7 +124,7 @@ export default function StatsDashboard() {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold tracking-tight">Stats</h2>
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-4xl mb-4">📊</div>
+        <div className="mb-4"><BarChart2 className="w-10 h-10 text-[#2a3040]" /></div>
         <h3 className="text-base font-semibold mb-1">No data yet</h3>
         <p className="text-sm text-[#8690a5] mb-4">Log a few days of work to see your stats.</p>
         <a href="/log" className="px-5 py-2 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] hover:opacity-90 transition-opacity">
@@ -169,7 +170,7 @@ export default function StatsDashboard() {
       {/* Weekly summary */}
       <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <span>📊</span>
+          <BarChart2 className="w-4 h-4 text-[#6c9fff]" />
           <span className="text-sm font-semibold">Weekly Summary</span>
           <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#6c9fff]/10 text-[#6c9fff] font-semibold">AI</span>
         </div>
@@ -186,7 +187,7 @@ export default function StatsDashboard() {
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{weeklySummary}</p>
             <button onClick={() => { navigator.clipboard?.writeText(weeklySummary); toast.success("Copied"); }}
               className="mt-2 px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">
-              📋 Copy
+              <Clipboard className="w-3 h-3 inline mr-1" />Copy
             </button>
           </div>
         )}

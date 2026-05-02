@@ -27,6 +27,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   }
 
+  if (body.date) {
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!isoDateRegex.test(body.date)) return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+    const d = new Date(body.date);
+    const now = new Date();
+    if (isNaN(d.getTime())) return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    if (d > now) return NextResponse.json({ error: "Date cannot be in the future" }, { status: 400 });
+    const fiveYearsAgo = new Date(); fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+    if (d < fiveYearsAgo) return NextResponse.json({ error: "Date too far in the past" }, { status: 400 });
+  }
+
   const allowed = ["summary", "raw_input", "project", "type", "date"] as const;
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   for (const key of allowed) {

@@ -5,6 +5,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
+import { Sparkles, Pin } from "lucide-react";
 import { TYPE_ICONS, ALL_TYPES } from "@/lib/constants";
 import type { LogType, PromptStyle } from "@/lib/types";
 
@@ -139,7 +140,7 @@ export default function LogForm() {
       {/* First-time onboarding — only shown once fetch has settled */}
       {logsReady && logs.length === 0 && (
         <div className="bg-[#141820] border border-[#2a3040] rounded-xl p-5 space-y-3">
-          <p className="text-sm font-semibold">👋 How it works</p>
+          <p className="text-sm font-semibold">How it works</p>
           <ol className="space-y-2 text-xs text-[#8690a5] leading-relaxed">
             <li><span className="text-white font-medium">1. Type freely</span> — "fixed the auth bug, reviewed 2 PRs, meeting about Q3 roadmap"</li>
             <li><span className="text-white font-medium">2. AI structures it</span> — clean summary, project name, and type tag automatically</li>
@@ -192,7 +193,7 @@ export default function LogForm() {
         {rawInput.trim().length >= 10 && (
           <div className={`bg-[#0c0f14] border rounded-xl px-4 py-3 ${previewFailed ? "border-[#2a3040]" : "border-[#6c9fff]/15"}`}>
             <p className="text-[10px] font-semibold mb-2 uppercase tracking-wider text-[#6c9fff]">
-              {previewLoading ? "Analyzing..." : previewFailed ? "Preview" : preview?.fallback ? "Preview (fallback)" : "✦ AI Preview"}
+              {previewLoading ? "Analyzing..." : previewFailed ? "Preview" : preview?.fallback ? "Preview (fallback)" : <span className="flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI Preview</span>}
             </p>
             {previewLoading && (
               <div className="space-y-2">
@@ -254,7 +255,7 @@ export default function LogForm() {
           <input value={whatsNext} onChange={e => setWhatsNext(e.target.value)}
             placeholder="What's next? (optional)"
             className="w-full bg-[#141820] border border-[#2a3040] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#3a4258] focus:outline-none focus:border-[#6c9fff]/50 transition-colors" />
-          <p className="text-[10px] text-[#3a4258] mt-1.5">📌 Pinned as a reminder on your Standup page tomorrow</p>
+          <p className="text-[10px] text-[#3a4258] mt-1.5 flex items-center gap-1"><Pin className="w-2.5 h-2.5" /> Pinned as a reminder on your Standup page tomorrow</p>
         </div>
 
         {/* Advanced toggle */}

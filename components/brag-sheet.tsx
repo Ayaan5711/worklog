@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { Clipboard } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useLogStore } from "@/lib/store";
@@ -185,7 +186,7 @@ export default function BragSheet() {
             <span className="text-[10px] text-[#556]">{bullets.length} accomplishments</span>
             <button onClick={copyAll}
               className="px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">
-              📋 Copy all
+              <Clipboard className="w-3 h-3 inline mr-1" />Copy all
             </button>
           </div>
         </div>

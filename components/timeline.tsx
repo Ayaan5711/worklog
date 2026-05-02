@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { List } from "lucide-react";
 import { useLogStore } from "@/lib/store";
 import { api } from "@/lib/api";
 import { TYPE_COLORS, TYPE_ICONS } from "@/lib/constants";
@@ -151,7 +152,7 @@ export default function TimelinePage() {
       {/* Empty state — no logs at all */}
       {!loading && logs.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="text-4xl mb-4">📝</div>
+          <div className="mb-4"><List className="w-10 h-10 text-[#2a3040]" /></div>
           <h3 className="text-base font-semibold mb-1">No logs yet</h3>
           <p className="text-sm text-[#8690a5] mb-4">Start tracking your work — it only takes 30 seconds.</p>
           <a href="/log" className="px-5 py-2 rounded-lg font-bold text-sm text-[#0c0f14] bg-gradient-to-r from-[#6c9fff] to-[#5ce0a0] hover:opacity-90 transition-opacity">

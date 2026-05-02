@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import { Pin, Clipboard } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useLogStore } from "@/lib/store";
@@ -88,9 +89,9 @@ export default function StandupGenerator() {
 
       {whatsNext && (
         <div className="bg-[#6c9fff]/[0.04] border border-[#6c9fff]/15 rounded-xl px-4 py-3 flex items-start gap-2">
-          <span className="text-sm">📌</span>
+          <Pin className="w-3.5 h-3.5 text-[#6c9fff] mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-[#6c9fff] font-semibold mb-0.5">📌 Pinned reminder</p>
+            <p className="text-[10px] text-[#6c9fff] font-semibold mb-0.5">Pinned reminder</p>
             <p className="text-sm text-white">{whatsNext}</p>
           </div>
           <button onClick={clearWhatsNext} className="text-[#556] hover:text-white transition-colors shrink-0 mt-0.5" title="Clear">
@@ -164,8 +165,8 @@ export default function StandupGenerator() {
           <p className="text-[11px] font-mono text-[#8690a5] mb-3">{fmtDate(date)}</p>
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-[#cdd5e0]">{update}</p>
           <button onClick={() => { navigator.clipboard?.writeText(update); toast.success("Copied"); }}
-            className="mt-4 px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors">
-            📋 Copy
+            className="mt-4 px-4 py-1.5 rounded-lg bg-[#6c9fff]/08 border border-[#6c9fff]/15 text-[#6c9fff] text-xs font-semibold hover:bg-[#6c9fff]/15 transition-colors flex items-center gap-1.5">
+            <Clipboard className="w-3 h-3" /> Copy
           </button>
         </div>
       )}

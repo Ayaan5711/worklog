@@ -52,6 +52,17 @@ export async function POST(req: NextRequest) {
   if (!raw_input?.trim()) return NextResponse.json({ error: "raw_input required" }, { status: 400 });
   if (raw_input.length > 2000) return NextResponse.json({ error: "raw_input too long (max 2000 chars)" }, { status: 400 });
 
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (date && !isoDateRegex.test(date)) return NextResponse.json({ error: "Invalid date format" }, { status: 400 });
+  if (date) {
+    const d = new Date(date);
+    const now = new Date();
+    if (isNaN(d.getTime())) return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    if (d > now) return NextResponse.json({ error: "Date cannot be in the future" }, { status: 400 });
+    const fiveYearsAgo = new Date(); fiveYearsAgo.setFullYear(now.getFullYear() - 5);
+    if (d < fiveYearsAgo) return NextResponse.json({ error: "Date too far in the past" }, { status: 400 });
+  }
+
   const db = createServiceClient();
 
   let summary: string;
