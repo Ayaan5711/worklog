@@ -211,6 +211,21 @@ export default function DataManager() {
         </div>
       </div>
 
+      {/* Support */}
+      <div className="bg-[#141820] border border-[#5ce0a0]/20 rounded-xl p-5">
+        <p className="text-sm font-semibold mb-1">Like worklog?</p>
+        <p className="text-xs text-[#8690a5] mb-3 leading-relaxed">
+          It&apos;s free and always will be. If it saves you time at work, a small tip keeps the lights on.
+        </p>
+        <a href="https://paypal.me/worklog" target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5ce0a0]/10 border border-[#5ce0a0]/25 text-[#5ce0a0] text-xs font-semibold hover:bg-[#5ce0a0]/20 transition-colors">
+          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+          Support worklog — pay what you want
+        </a>
+      </div>
+
       {/* Tips */}
       <div className="bg-[#141820] border border-[#6c9fff]/15 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">

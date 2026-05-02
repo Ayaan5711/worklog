@@ -52,6 +52,13 @@ export default function SideNav({ user }: { user: { name?: string | null; email?
           <p className="text-[10px] text-[#556] truncate">{user.email}</p>
         </div>
       </div>
+      <a href="https://paypal.me/worklog" target="_blank" rel="noopener noreferrer"
+        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-[#5ce0a0] hover:bg-white/5 transition-all">
+        <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        Support worklog
+      </a>
       <button onClick={() => signOut({ callbackUrl: "/" })}
         className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-[#556] hover:text-white hover:bg-white/5 transition-all">
         <LogOut className="w-4 h-4" />

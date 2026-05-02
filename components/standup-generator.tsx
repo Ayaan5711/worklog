@@ -116,7 +116,7 @@ export default function StandupGenerator() {
                 <div className="absolute z-50 mt-1 bg-[#141820] border border-[#2a3040] rounded-xl shadow-xl p-2">
                   <style>{CAL_STYLES}</style>
                   <DayPicker mode="single" selected={new Date(date + "T00:00:00")} disabled={{ after: new Date() }}
-                    onSelect={d => { if (d) { setDate(d.toISOString().slice(0, 10)); setCalOpen(false); } }} />
+                    onSelect={d => { if (d) { setDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`); setCalOpen(false); } }} />
                 </div>
               )}
             </div>

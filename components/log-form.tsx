@@ -105,6 +105,15 @@ export default function LogForm() {
       if (lastSavedTimer.current) clearTimeout(lastSavedTimer.current);
       lastSavedTimer.current = setTimeout(() => setLastSaved(null), 6000);
       toast.success("Saved and structured with AI");
+      const totalAfter = logs.length + 1;
+      const milestones = [5, 20, 50];
+      if (milestones.includes(totalAfter) && !localStorage.getItem(`worklog_support_nudge_${totalAfter}`)) {
+        localStorage.setItem(`worklog_support_nudge_${totalAfter}`, "1");
+        setTimeout(() => toast(`You've logged ${totalAfter} entries — if worklog saves you time, consider supporting it`, {
+          duration: 8000,
+          action: { label: "Support", onClick: () => window.open("https://paypal.me/worklog", "_blank") },
+        }), 1500);
+      }
     } catch (err) {
       setSaveFailed(true);
       toast.error(err instanceof Error ? err.message : "Failed to save");
@@ -244,7 +253,7 @@ export default function LogForm() {
                 .rdp-day_today:not(.rdp-day_selected) { border: 1px solid #6c9fff55; color: #6c9fff; }
               `}</style>
               <DayPicker mode="single" selected={new Date(date + "T00:00:00")}
-                onSelect={(d) => { if (d) { setDate(d.toISOString().slice(0, 10)); setCalOpen(false); } }}
+                onSelect={(d) => { if (d) { setDate(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`); setCalOpen(false); } }}
                 disabled={{ after: new Date() }} />
             </div>
           )}
